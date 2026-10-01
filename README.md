@@ -40,13 +40,24 @@ Cloudflare KV（CardsCompetitiveAnalysis）── 存網站文字、試算表設
 - 查看待補資料（缺網址、疑似誤植、官網查無資料的項目）
 - 修改管理者密碼
 
+## 檔案說明（全部放在專案根目錄，沒有子資料夾）
+
+| 檔案 | 用途 |
+| --- | --- |
+| `worker.js` | 主程式（API、登入、讀試算表、產生比較表） |
+| `page.js` | 網站畫面 |
+| `crawler.js` | 內建爬蟲與關鍵字規則（`RULES`） |
+| `sheets.js` | 讀取 Google 試算表 |
+| `data.js` | 比較項目與預設設定 |
+| `wrangler.toml` | Cloudflare 設定（Worker 名稱、KV） |
+
 ## 更新程式（GitHub）
 
-到 GitHub 專案頁 →「Add file」→「Upload files」→ 把新版的 `public`、`worker` 資料夾與 `wrangler.toml` 拖進去 → Commit。Cloudflare 會自動重新部署（約 1～2 分鐘）。
+到 GitHub 專案頁 →「Add file」→「Upload files」→ 選取所有檔案上傳 → Commit。Cloudflare 會自動重新部署（約 1～2 分鐘）。
 
 ## 內建爬蟲
 
-每格放的是官網原句（1～2 句），由 `worker/crawler.js` 的 `RULES` 關鍵字規則挑選。某個項目常挑錯時調整該規則即可。
+每格放的是官網原句（1～2 句），由 `crawler.js` 的 `RULES` 關鍵字規則挑選。某個項目常挑錯時調整該規則即可。
 
 （選用）在 Cloudflare 的 Worker 設定加入 `GEMINI_API_KEY`（Secret），會改用 Gemini 擷取，摘要更精簡。
 

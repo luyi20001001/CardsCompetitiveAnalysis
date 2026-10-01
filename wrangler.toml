@@ -1,12 +1,7 @@
 # Cloudflare Workers 設定（免費方案即可）
-name = "CardsCompetitiveAnalysis"
-main = "worker/index.js"
+name = "cardscompetitiveanalysis"
+main = "worker.js"
 compatibility_date = "2025-09-01"
-
-# 網站靜態檔
-[assets]
-directory = "./public"
-binding = "ASSETS"
 
 # 儲存網站設定、管理者密碼、缺漏紀錄與網頁快取（KV：CardsCompetitiveAnalysis）
 [[kv_namespaces]]
