@@ -8,8 +8,7 @@ compatibility_date = "2025-09-01"
 directory = "./public"
 binding = "ASSETS"
 
-# 儲存網址覆蓋值、缺漏紀錄與網頁快取
-# 執行 `npx wrangler kv namespace create STORE` 後，把回傳的 id 貼到下面
+# 儲存網站設定、管理者密碼、缺漏紀錄與網頁快取（KV：CardsCompetitiveAnalysis）
 [[kv_namespaces]]
 binding = "STORE"
 id = "897559016557451eaac36e6250907e2f"
@@ -21,7 +20,6 @@ CACHE_MINUTES = "60"
 USE_GEMINI = "true"
 GEMINI_MODEL = "gemini-2.5-flash"
 
-# 機密請用指令設定，不要寫在這個檔案裡：
-#   npx wrangler secret put ADMIN_PASSWORD     （必要）
-#   npx wrangler secret put SESSION_SECRET     （必要）
-#   npx wrangler secret put GEMINI_API_KEY     （選用，不設定就使用內建爬蟲）
+# 不需要設定任何機密即可運作：
+#   管理者預設密碼 1234，登入後可在後台修改
+#   （選用）設定 GEMINI_API_KEY 後改用 Gemini 擷取

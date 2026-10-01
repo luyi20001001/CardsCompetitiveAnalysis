@@ -1,38 +1,23 @@
 // ============================================================
-// 卡片與比較項目主檔（前端與 Worker 共用）
-// 新增卡片：在對應銀行的 cards 陣列加一筆即可。
-// 網址可在網站的「管理者後台」修改，修改值會覆蓋這裡的預設值。
+// 比較項目與預設設定（前端與 Worker 共用）
+// 卡片與網址一律從 Google 試算表讀取，不寫在程式裡。
 // ============================================================
 
-export const BANKS = [
-  { id: 'fubon', name: '台北富邦銀行', short: '台北富邦', cards: [
-    { id: 'fb-j', name: 'Ｊ卡', tier: '主力卡', feature: '旅遊', type: '免切換', kind: '銀行卡', official: 'https://www.fubon.com/banking/personal/credit_card/all_card/omiyage/omiyage.htm', event: '' },
-    { id: 'fb-imperial', name: '尊御卡', tier: '主力卡', feature: '財管', type: '免切換', kind: '銀行卡', official: 'https://www.fubon.com/banking/personal/credit_card/all_card/imperial/imperial.htm', event: '' },
-    { id: 'fb-digital', name: '數位生活卡', tier: '主力卡', feature: '數位生活', type: '免切換', kind: '銀行卡', official: '', event: '' },
-    { id: 'fb-costco', name: 'Costco卡', tier: '主力卡', feature: '量販', type: '免切換', kind: '聯名卡', official: '', event: '' },
-    { id: 'fb-momo', name: 'Momo卡', tier: '主力卡', feature: '電商', type: '免切換', kind: '聯名卡', official: '', event: '' },
-    { id: 'fb-op', name: 'Openpossible卡', tier: '主力卡', feature: '電信', type: '免切換', kind: '聯名卡', official: '', event: '' },
-  ], addons: {
-    home: 'https://www.fubon.com/banking/personal/credit_card/benefits/benefits.htm',
-    ride: 'https://www.fubon.com/banking/personal/credit_card/airport_ride/airport_ride.htm',
-    lounge: 'https://www.fubon.com/banking/personal/credit_card/airport_VIP/airport_VIP.htm',
-    apark: 'https://www.fubon.com/banking/personal/credit_card/airport_parking/airport_parking.htm',
-    cpark: 'https://www.fubon.com/banking/personal/credit_card/local_parking/local_parking.htm',
-    road: 'https://www.fubon.com/banking/personal/credit_card/roadside_help/roadside_help.htm',
-    golf: 'https://www.fubon.com/banking/personal/credit_card/golf/golf.htm',
-    rail: 'https://www.fubon.com/banking/personal/credit_card/golf/golf.htm',
-    tins: 'https://www.fubon.com/banking/personal/credit_card/trip_insurance/trip_insurance.htm',
-    tinc: 'https://www.fubon.com/banking/personal/credit_card/trip_insurance/trip_insurance.htm',
-  } },
-  { id: 'cathay', name: '國泰世華銀行', short: '國泰世華', cards: [
-    { id: 'ct-cube', name: 'Cube卡', tier: '主力卡', feature: '萬用卡', type: '免切換', kind: '銀行卡', official: 'https://www.cathay-cube.com.tw/cathaybk/personal/product/credit-card/cards/cube', event: '' },
-    { id: 'ct-world', name: '國泰世界卡', tier: '主力卡', feature: '財管', type: '免切換', kind: '銀行卡', official: 'https://www.cathay-cube.com.tw/cathaybk/personal/product/credit-card/cards/world', event: '' },
-  ], addons: {} },
-  { id: 'ctbc', name: '中國信託銀行', short: '中國信託', cards: [
-    { id: 'cb-uniopen', name: 'uniopen聯名卡', tier: '主力卡', feature: '旅遊', type: '免切換', kind: '聯名卡', official: 'https://www.ctbcbank.com/twrbo/zh_tw/cc_index/cc_product/cc_introduction_index/C_uniopen.html', event: 'https://mkt.ctbcbank.com/long/creditcard/N2025052600033_01/index.html' },
-    { id: 'cb-top', name: '財管鼎鑽卡', tier: '主力卡', feature: '財管', type: '免切換', kind: '銀行卡', official: 'https://www.ctbcbank.com/twrbo/zh_tw/cc_index/cc_product/cc_introduction_index/B_Top_F.html', event: 'https://mkt.ctbcbank.com/long/creditcard/WMmember/index.html' },
-  ], addons: {} },
-];
+// 預設設定（管理者後台可修改，修改後存在 Cloudflare KV）
+export const DEFAULT_CONFIG = {
+  sheetUrl: 'https://docs.google.com/spreadsheets/d/1DOp28OxxRUlKhwMvMj-Z-gzV4J-Bi-RLVA5Ni7DYHH8/edit?usp=sharing',
+  // 每家銀行對應試算表中的兩個分頁：卡片清單、附加權益
+  banks: [
+    { id: 'fubon', name: '台北富邦銀行', short: '台北富邦', cardSheet: '富邦', addonSheet: '富邦-附加權益' },
+    { id: 'cathay', name: '國泰世華銀行', short: '國泰世華', cardSheet: '國泰', addonSheet: '國泰-附加權益' },
+    { id: 'ctbc', name: '中國信託銀行', short: '中國信託', cardSheet: '中信', addonSheet: '中信-附加權益' },
+  ],
+  texts: {
+    title: '信用卡競品比較產生器',
+    subtitle: '選銀行、選卡、選比較細項，拖曳調整表格後產生比較表與洞察。',
+    tagline: '每次產生都直接讀取指定官方網址，不使用外部搜尋',
+  },
+};
 
 // local: true 表示直接使用主檔資料，不需呼叫 Gemini
 // ask：交給 Gemini 擷取時的欄位說明
@@ -63,24 +48,3 @@ export const ITEMS = {
 
 export const GROUP_LABEL = { product: '產品權益', addon: '附加權益' };
 
-// 依主檔與管理者覆蓋值取得實際網址
-export function defaultUrl(key) {
-  const [kind, a, b] = key.split(':');
-  if (kind === 'card') {
-    for (const bank of BANKS) { const c = bank.cards.find(x => x.id === a); if (c) return c[b] || ''; }
-    return '';
-  }
-  if (kind === 'addon') return BANKS.find(x => x.id === a)?.addons[b] || '';
-  return '';
-}
-export function resolveUrl(key, overrides) {
-  return overrides && Object.prototype.hasOwnProperty.call(overrides, key) ? overrides[key] : defaultUrl(key);
-}
-export function allUrlKeys() {
-  const keys = [];
-  for (const b of BANKS) {
-    for (const c of b.cards) keys.push(`card:${c.id}:official`, `card:${c.id}:event`);
-    for (const it of ITEMS.addon) keys.push(`addon:${b.id}:${it.id}`);
-  }
-  return keys;
-}

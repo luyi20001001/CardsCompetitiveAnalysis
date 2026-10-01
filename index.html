@@ -253,6 +253,23 @@ details.bank > summary{list-style:none;cursor:pointer;display:flex;align-items:c
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 .genwrap{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
 .force{font-size:12.5px;color:var(--muted);display:inline-flex;gap:6px;align-items:center}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px 14px;margin-top:14px}
+.fld{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--muted);font-weight:600}
+.fld.wide{margin-top:14px}
+.fld input,.banktbl input{width:100%;padding:9px 12px;border-radius:12px;border:1px solid var(--line);background:var(--glass);color:var(--ink);font-size:14px;font-weight:500}
+.fld input:focus,.banktbl input:focus{outline:none;border-color:var(--mint);box-shadow:0 0 0 3px var(--mint-soft)}
+.formact{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.btn.sm{padding:8px 16px;font-size:13px}
+.btn.primary.sm{padding:8px 18px;font-size:13px}
+.banktbl{margin-top:14px;display:flex;flex-direction:column;gap:8px}
+.bk{display:grid;grid-template-columns:1.2fr 1fr 1fr 1.4fr auto;gap:8px;align-items:center;padding:10px;border-radius:14px;background:var(--glass-strong);border:1px solid var(--edge)}
+.bk.hd{background:none;border:0;padding:0 10px;font-size:11.5px;color:var(--muted);font-weight:600}
+.st{font-size:12px;line-height:1.5}
+.st .ok{color:var(--mint-deep)}
+.st .no{color:var(--blush-deep)}
+.synced{margin:10px 0 0;font-size:12px;color:var(--muted)}
+.loading{padding:12px 4px;color:var(--muted);font-size:13px}
+@media (max-width:760px){.bk{grid-template-columns:1fr 1fr}.bk.hd{display:none}.bk .st{grid-column:1/-1}}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);opacity:0;padding:10px 18px;border-radius:999px;background:var(--glass-strong);border:1px solid var(--edge);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);box-shadow:var(--shadow);font-size:13.5px;font-weight:600;transition:all .25s;pointer-events:none;z-index:50}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 
@@ -282,9 +299,9 @@ details.bank > summary{list-style:none;cursor:pointer;display:flex;align-items:c
 <div class="app">
   <header class="top">
     <div class="brand">
-      <h1>信用卡競品比較產生器</h1>
-      <p>選銀行、選卡、選比較細項，拖曳調整表格後產生比較表與洞察。</p>
-      <span class="guard"><i></i>每次產生都直接讀取指定官方網址，不使用外部搜尋</span>
+      <h1 id="siteTitle">信用卡競品比較產生器</h1>
+      <p id="siteSub">選銀行、選卡、選比較細項，拖曳調整表格後產生比較表與洞察。</p>
+      <span class="guard"><i></i><span id="siteTag">每次產生都直接讀取指定官方網址，不使用外部搜尋</span></span>
     </div>
     <div class="topact">
       <button class="btn" id="adminBtn"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M7 11V8a5 5 0 0 1 10 0v3M5 11h14v10H5z"/></svg><span id="adminLabel">管理者登入</span><span class="badge" id="auditCount" hidden>0</span></button>
@@ -337,19 +354,53 @@ details.bank > summary{list-style:none;cursor:pointer;display:flex;align-items:c
   <!-- ============ 後台 ============ -->
   <section class="view" id="view-admin" hidden>
     <div class="adminbar">
-      <div><h2>管理者後台</h2><p>管理各銀行的官網與附加權益網址。修改後所有使用者都會套用。</p></div>
+      <div><h2>管理者後台</h2><p>網址與卡片一律以 Google 試算表為準；這裡管理網站文字、試算表設定與密碼。</p></div>
       <button class="btn" id="backBtn">返回比較表</button>
     </div>
+
+    <div class="glass sec">
+      <h2>網站文字</h2>
+      <p class="lead">修改首頁標題與說明文字，儲存後所有人都會看到。</p>
+      <div class="form">
+        <label class="fld"><span>標題</span><input id="tTitle" maxlength="200"></label>
+        <label class="fld"><span>副標題</span><input id="tSub" maxlength="200"></label>
+        <label class="fld"><span>提示標籤</span><input id="tTag" maxlength="200"></label>
+      </div>
+      <div class="formact"><button class="btn primary sm" id="saveTexts">儲存文字</button><button class="btn sm" id="resetTexts">恢復預設</button></div>
+    </div>
+
+    <div class="glass sec">
+      <div class="srcgrid">
+        <div><h2>資料來源：Google 試算表</h2>
+        <p class="lead">試算表需設為「知道連結的任何人都能檢視」。在試算表修改網址或新增卡片後，網站約 1 分鐘內自動更新；想立刻看到可按「立即同步」。</p></div>
+        <div class="formact"><a class="btn sm" id="openSheet" target="_blank" rel="noopener">開啟試算表 ↗</a><button class="btn sm" id="syncNow">立即同步</button></div>
+      </div>
+      <label class="fld wide"><span>試算表網址</span><input id="sheetUrl" type="url"></label>
+      <div class="banktbl" id="bankTbl"></div>
+      <div class="formact"><button class="btn sm" id="addBank">＋ 新增銀行</button><button class="btn primary sm" id="saveSheet">儲存資料來源</button></div>
+      <p class="synced" id="syncedAt"></p>
+    </div>
+
     <div class="glass sec">
       <h2>待補資料<span class="badge" id="gapCount">0</span></h2>
-      <p class="lead">後台缺網址、疑似誤植，以及使用者勾選過但查無官方資料的項目。點「補網址」會跳到下方對應欄位。</p>
+      <p class="lead">試算表缺網址、疑似誤植，以及使用者勾選過但官網查無資料的項目。請到試算表補上網址。</p>
       <div class="gaps" id="gaps"></div>
     </div>
 
     <div class="glass sec">
-      <h2>網址管理</h2>
-      <p class="lead">按 ✎ 修改網址，Enter 儲存、Esc 取消。綠點代表已在後台改過，可按「還原」回到預設值。</p>
+      <h2>網址總覽</h2>
+      <p class="lead">目前從試算表讀到的網址（唯讀）。要修改請直接編輯試算表。</p>
       <div id="acc"></div>
+    </div>
+
+    <div class="glass sec">
+      <h2>修改管理者密碼</h2>
+      <p class="lead">預設密碼為 1234，建議改成只有你知道的密碼。</p>
+      <div class="form">
+        <label class="fld"><span>新密碼</span><input id="newPw" type="password" autocomplete="new-password" minlength="4"></label>
+        <label class="fld"><span>再輸入一次</span><input id="newPw2" type="password" autocomplete="new-password" minlength="4"></label>
+      </div>
+      <div class="formact"><button class="btn primary sm" id="savePw">更新密碼</button></div>
     </div>
   </section>
 </div>
@@ -371,25 +422,24 @@ details.bank > summary{list-style:none;cursor:pointer;display:flex;align-items:c
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script type="module">
-import { BANKS, ITEMS, GROUP_LABEL, defaultUrl } from './data.js';
-const CARD = {}; const BANK_OF = {};
-BANKS.forEach(b => b.cards.forEach(c => { CARD[c.id]=c; BANK_OF[c.id]=b; }));
+import { ITEMS, GROUP_LABEL, DEFAULT_CONFIG } from './data.js';
+// 銀行與卡片來自 Google 試算表（由 /api/state 提供）
+let BANKS = [], CARD = {}, BANK_OF = {};
 const ITEM = {}; Object.entries(ITEMS).forEach(([g,list]) => list.forEach(it => { ITEM[it.id] = {...it, group:g}; }));
 
 /* ================= 狀態 ================= */
 const state = {
   tab:'gen',
   cats:{ product:true, addon:true },
-  banks:{ fubon:true, cathay:true, ctbc:true },
-  cards:new Set(['fb-j','ct-cube','cb-uniopen']),
+  banks:{},
+  cards:new Set(),
   items:new Set(['feature','kind','fee','elig','reward','mech','ride','lounge','cpark']),
-  colOrder:['fb-j','ct-cube','cb-uniopen'],
+  colOrder:[],
   rowOrder:{ product:['feature','kind','fee','elig','reward','mech'], addon:['ride','lounge','cpark'] },
   phase:'skeleton', // skeleton | parsing | done
   stale:false,
-  overrides:{}, // 後台修改（覆蓋試算表值）
+  loaded:false, loadError:'', texts:{...DEFAULT_CONFIG.texts}, sheetUrl:'', bankConfig:[], syncedAt:null,
   hits:{},      // 使用者勾選但查無資料
-  editing:null,
   results:{}, errors:{}, failed:{}, insights:null, fetchedAt:null, cached:false,
   isAdmin:false,
 };
@@ -404,18 +454,28 @@ async function api(path, opts = {}){
   if (!res.ok){ const e = new Error(data.message || data.error || res.status); e.status = res.status; e.code = data.error; throw e; }
   return data;
 }
-async function loadState(){
-  try { const d = await api('/api/state'); state.overrides = d.overrides || {}; state.hits = d.hits || {}; }
-  catch(e){ toast('無法讀取後台資料'); }
-  renderFilters(); if (state.phase!=='parsing') renderTable(); renderAdmin();
-}
-async function persist(){
-  try { const d = await api('/api/urls', { method:'PUT', body: JSON.stringify({ overrides: state.overrides }) }); state.overrides = d.overrides; return true; }
-  catch(e){
-    if (e.status === 401){ logout(); toast('登入已過期，請重新登入'); }
-    else toast(e.code === 'bad_url' ? '網址需以 http:// 或 https:// 開頭' : '儲存失敗，請稍後再試');
-    await loadState(); return false;
+function applyState(d){
+  BANKS = d.banks || []; CARD = {}; BANK_OF = {};
+  BANKS.forEach(b => b.cards.forEach(c => { CARD[c.id]=c; BANK_OF[c.id]=b; }));
+  state.texts = { ...DEFAULT_CONFIG.texts, ...(d.texts||{}) };
+  state.sheetUrl = d.sheetUrl || ''; state.bankConfig = d.bankConfig || []; state.syncedAt = d.syncedAt;
+  state.hits = d.hits || {}; state.loadError = d.catalogError || '';
+  // 移除試算表已刪除的卡片；第一次載入時，每家銀行預設選第一張有官網的卡
+  [...state.cards].forEach(id => { if (!CARD[id]) state.cards.delete(id); });
+  if (!state.loaded){
+    BANKS.forEach(b => { const c = b.cards.find(x => x.official) || b.cards[0]; if (c) state.cards.add(c.id); });
   }
+  state.loaded = true;
+  syncOrders(); applyTexts();
+}
+function applyTexts(){
+  $('#siteTitle').textContent = state.texts.title; $('#siteSub').textContent = state.texts.subtitle; $('#siteTag').textContent = state.texts.tagline;
+  document.title = state.texts.title;
+}
+async function loadState(){
+  try { applyState(await api('/api/state')); }
+  catch(e){ state.loadError = e.message; toast('無法讀取後台資料：' + e.message); }
+  renderFilters(); if (state.phase!=='parsing') renderTable(); renderInsights(); renderAdmin();
 }
 
 const $ = s => document.querySelector(s);
@@ -424,12 +484,17 @@ function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('on
 function host(u){ try{ return new URL(u).hostname.replace(/^www\./,''); }catch(e){ return u; } }
 
 /* ================= 網址解析 ================= */
-function eff(key){ return (key in state.overrides) ? state.overrides[key] : defaultUrl(key); }
+function eff(key){
+  const [kind,a,b] = key.split(':');
+  if (kind==='card') return CARD[a]?.[b] || '';
+  if (kind==='addon') return BANKS.find(x=>x.id===a)?.addons?.[b] || '';
+  return '';
+}
 
-function visibleCols(){ return state.colOrder.filter(id => state.cards.has(id) && state.banks[BANK_OF[id].id]); }
+function visibleCols(){ return state.colOrder.filter(id => state.cards.has(id) && state.banks[BANK_OF[id].id] !== false); }
 function visibleRows(g){ return state.cats[g] ? state.rowOrder[g].filter(id => state.items.has(id)) : []; }
 function syncOrders(){
-  const selCards = BANKS.flatMap(b => state.banks[b.id] ? b.cards.map(c=>c.id).filter(id=>state.cards.has(id)) : []);
+  const selCards = BANKS.flatMap(b => state.banks[b.id] !== false ? b.cards.map(c=>c.id).filter(id=>state.cards.has(id)) : []);
   state.colOrder = state.colOrder.filter(id => selCards.includes(id)).concat(selCards.filter(id => !state.colOrder.includes(id)));
   ['product','addon'].forEach(g => {
     const sel = ITEMS[g].map(i=>i.id).filter(id => state.items.has(id));
@@ -475,10 +540,11 @@ function cellText(d){
 
 /* ================= 篩選面板 ================= */
 function renderFilters(){
-  $('#bankBox').innerHTML = BANKS.map(b => `
-    <label class="cb"><input type="checkbox" data-bank="${b.id}" ${state.banks[b.id]?'checked':''}><span class="box"></span>
+  if (!BANKS.length){ $('#bankBox').innerHTML = `<p class="loading">${state.loaded ? (esc(state.loadError) || '試算表中沒有銀行資料，請到管理者後台確認設定。') : '正在讀取 Google 試算表…'}</p>`; }
+  else $('#bankBox').innerHTML = BANKS.map(b => `
+    <label class="cb"><input type="checkbox" data-bank="${b.id}" ${state.banks[b.id]!==false?'checked':''}><span class="box"></span>
       <span>${b.name}<small>${b.cards.length} 張</small></span></label>
-    <div class="cards ${state.banks[b.id]?'':'off'}">
+    <div class="cards ${state.banks[b.id]!==false?'':'off'}">
       ${b.cards.map(c => `<label class="chip ${eff(`card:${c.id}:official`)?'':'missing'}">
         <input type="checkbox" data-card="${c.id}" ${state.cards.has(c.id)?'checked':''}><span class="ck"></span>${esc(c.name)}</label>`).join('')}
     </div>`).join('');
@@ -518,7 +584,7 @@ function renderCell(cardId, itemId, i){
   if (state.phase === 'parsing') return `<span class="ph">解析中</span>`;
   const d = cellData(cardId, itemId);
   const src = d.url ? `<a class="src" href="${esc(d.url)}" target="_blank" rel="noopener">${esc(host(d.url))} ↗</a>` : '';
-  const fix = d.key && state.isAdmin ? `<button class="fix" data-fix="${esc(d.key)}">補網址</button>` : '';
+  const fix = d.key && state.isAdmin ? `<button class="fix" data-fix="${esc(d.key)}">查看缺漏</button>` : '';
   let body;
   if (d.s==='data') body = `<span class="v-data">${esc(d.t)}</span>${d.note?`<span class="note">${esc(d.note)}</span>`:''}${d.warn?`<span class="v-warn">${esc(d.warn)}</span>`:''}${src}`;
   else if (d.s==='partial') body = `<span class="v-data">${esc(d.t)}</span><span class="note">${esc(d.note)}</span>${src}${fix}`;
@@ -684,93 +750,123 @@ function renderInsights(){
   box.classList.remove('off');
 }
 
-/* ================= 後台：資料來源、待補、網址管理 ================= */
+/* ================= 後台 ================= */
 const CHEV = '<svg class="chev" viewBox="0 0 20 20" aria-hidden="true"><path d="M7 4l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const openAcc = new Set(['product']);
 function shortUrl(u){ try{ const x=new URL(u); const seg=x.pathname.split('/').filter(Boolean); return x.hostname.replace(/^www\./,'') + (seg.length ? (seg.length>1?'/…/':'/') + seg[seg.length-1] : ''); }catch(e){ return u; } }
 function isDup(k){ const [kind,bid,it] = k.split(':'); return kind==='addon' && it==='rail' && eff(k) && eff(k) === eff(`addon:${bid}:golf`); }
-
 function urlCell(key){
-  if (state.editing === key) return `<div class="u"><input data-edit="${key}" type="url" value="${esc(eff(key))}" placeholder="https://…" aria-label="輸入網址"></div>`;
-  const v = eff(key), mod = key in state.overrides;
-  return `<div class="u">${mod?'<i class="mod" title="已在後台修改"></i>':''}
-    ${v ? `<a href="${esc(v)}" target="_blank" rel="noopener" title="${esc(v)}">${esc(shortUrl(v))}</a>` : `<span class="none">缺網址</span>`}
-    ${isDup(key)?'<span class="warnb">疑似誤植</span>':''}
-    <button class="ib" data-editbtn="${key}" aria-label="修改網址">✎</button>${mod?`<button class="ib" data-reset="${key}">還原</button>`:''}</div>`;
+  const v = eff(key);
+  return `<div class="u">${v ? `<a href="${esc(v)}" target="_blank" rel="noopener" title="${esc(v)}">${esc(shortUrl(v))}</a>` : `<span class="none">缺網址</span>`}${isDup(key)?'<span class="warnb">疑似誤植</span>':''}</div>`;
 }
 function gapsList(){
   const g = [];
   BANKS.forEach(b => {
-    b.cards.forEach(c => { if (!eff(`card:${c.id}:official`)) g.push({ k:'缺官網', t:`${b.short} ${c.name}`, sub:'產品權益無法解析', key:`card:${c.id}:official` }); });
+    b.cards.forEach(c => { if (!eff(`card:${c.id}:official`)) g.push({ k:'缺官網', t:`${b.short} ${c.name}`, sub:'產品權益無法讀取', key:`card:${c.id}:official` }); });
     ITEMS.addon.forEach(it => { const k=`addon:${b.id}:${it.id}`; if (!eff(k)) g.push({ k:'缺附加權益網址', t:`${b.short} ${it.label}`, key:k, grp:b.id }); else if (isDup(k)) g.push({ k:'疑似誤植', t:`${b.short} 高鐵購票`, sub:'網址與「高爾夫球」相同', key:k }); });
   });
   return g;
 }
+function bankRow(b, i){
+  const live = BANKS.find(x => x.id === b.id);
+  const st = live?.status;
+  const line = (lbl, s) => s ? `<div><span class="${s.ok?'ok':'no'}">${s.ok?'✓':'✕'} ${lbl}：</span>${esc(s.text)}</div>` : '';
+  return `<div class="bk" data-i="${i}">
+    <input data-f="name" value="${esc(b.name)}" placeholder="銀行名稱" aria-label="銀行名稱">
+    <input data-f="cardSheet" value="${esc(b.cardSheet)}" placeholder="卡片分頁名稱" aria-label="卡片分頁名稱">
+    <input data-f="addonSheet" value="${esc(b.addonSheet||'')}" placeholder="附加權益分頁名稱" aria-label="附加權益分頁名稱">
+    <div class="st">${st ? line('卡片', st.cards) + line('附加權益', st.addons) : '<span class="no">尚未同步</span>'}</div>
+    <button class="ib" data-delbank="${i}" aria-label="刪除 ${esc(b.name)}">刪除</button>
+  </div>`;
+}
+let bankDraft = null; // 編輯中的銀行設定
 function renderAdmin(){
-  const gaps = gapsList(), hits = Object.values(state.hits).filter(h => CARD[h.cid] && ITEM[h.rid]).sort((a,b)=>b.count-a.count);
+  const gaps = gapsList(), hits = Object.values(state.hits).filter(h => ITEM[h.rid]).sort((a,b)=>b.count-a.count);
   $('#auditCount').textContent = gaps.length;
   $('#gapCount').textContent = gaps.length;
+  if (!state.isAdmin) return;
 
-  // 待補：附加權益缺漏依銀行合併，避免清單太長
-  const merged = []; const byBank = {};
-  gaps.forEach(x => { if (x.grp){ (byBank[x.grp] ||= []).push(x); } else merged.push(x); });
-  Object.entries(byBank).forEach(([bid, arr]) => merged.push({ k:'缺附加權益網址', t:`${BANKS.find(b=>b.id===bid).short}：${arr.length} 個主題`, sub: arr.length===ITEMS.addon.length ? '全部主題皆未設定' : arr.map(a=>a.t.split(' ')[1]).join('、'), key:arr[0].key }));
-  $('#gaps').innerHTML = (merged.length ? merged.map(x => `<div class="gap"><span class="kind">${x.k}</span><span class="t">${esc(x.t)}${x.sub?`<small>${esc(x.sub)}</small>`:''}</span><button class="fix" data-fix="${x.key}">補網址</button></div>`).join('') : '<div class="gap"><span class="t">目前沒有缺漏的網址。</span></div>')
-    + Object.values(hits.reduce((m,h) => { (m[h.cid] ||= { cid:h.cid, items:[], n:0 }).items.push(ITEM[h.rid].label); m[h.cid].n = Math.max(m[h.cid].n, h.count); return m; }, {}))
-        .map(g => `<div class="gap"><span class="kind m">使用者勾選</span><span class="t">${BANK_OF[g.cid].short} ${esc(CARD[g.cid].name)}<small>${g.items.join('、')}｜最多被勾選 ${g.n} 次，查無官方資料</small></span></div>`).join('');
+  // 網站文字（正在輸入時不覆蓋）
+  const fill = (id, v) => { const el = $(id); if (el && document.activeElement !== el && !el.dataset.dirty) el.value = v; };
+  fill('#tTitle', state.texts.title); fill('#tSub', state.texts.subtitle); fill('#tTag', state.texts.tagline);
+  fill('#sheetUrl', state.sheetUrl);
+  $('#openSheet').href = state.sheetUrl || '#';
+  if (!bankDraft) bankDraft = state.bankConfig.map(b => ({...b}));
+  $('#bankTbl').innerHTML = `<div class="bk hd"><span>銀行名稱</span><span>卡片分頁</span><span>附加權益分頁</span><span>讀取狀態</span><span></span></div>` + bankDraft.map(bankRow).join('');
+  $('#syncedAt').textContent = state.syncedAt ? `最後同步：${new Date(state.syncedAt).toLocaleString('zh-TW',{hour12:false})}` : '';
 
-  if (state.editing) return; // 編輯中不重繪網址清單
+  const merged = [], byBank = {};
+  gaps.forEach(x => { if (x.grp) (byBank[x.grp] ||= []).push(x); else merged.push(x); });
+  Object.entries(byBank).forEach(([bid, arr]) => merged.push({ k:'缺附加權益網址', t:`${BANKS.find(b=>b.id===bid).short}：${arr.length} 個主題`, sub: arr.length===ITEMS.addon.length ? '全部主題皆未設定' : arr.map(a=>a.t.split(' ').slice(1).join(' ')).join('、'), key:arr[0].key }));
+  const hitGroups = Object.values(hits.reduce((m,h) => { const k = h.cid; (m[k] ||= { bank:h.bank || BANK_OF[h.cid]?.short || '', card:h.card || CARD[h.cid]?.name || '', items:[], n:0 }).items.push(ITEM[h.rid].label); m[k].n = Math.max(m[k].n, h.count); return m; }, {}));
+  $('#gaps').innerHTML = (merged.length ? merged.map(x => `<div class="gap"><span class="kind">${x.k}</span><span class="t">${esc(x.t)}${x.sub?`<small>${esc(x.sub)}</small>`:''}</span><button class="fix" data-fix="${x.key}">查看</button></div>`).join('') : '<div class="gap"><span class="t">目前沒有缺漏的網址。</span></div>')
+    + hitGroups.map(g => `<div class="gap"><span class="kind m">官網查無</span><span class="t">${esc(g.bank)} ${esc(g.card)}<small>${g.items.join('、')}｜最多被勾選 ${g.n} 次</small></span></div>`).join('');
+
   const missCard = b => b.cards.filter(c => !eff(`card:${c.id}:official`)).length;
   const missAdd = b => ITEMS.addon.filter(it => !eff(`addon:${b.id}:${it.id}`) || isDup(`addon:${b.id}:${it.id}`)).length;
   const acc = (id, title, total, miss, inner) => `<details class="acc" data-acc="${id}" ${openAcc.has(id)?'open':''}><summary>${CHEV}${title}${miss?`<span class="miss">待補 ${miss}</span>`:''}<span class="cnt">${total}</span></summary><div class="accbody">${inner}</div></details>`;
-  const bank = (id, b, cnt, miss, inner, note='') => `<details class="bank" data-acc="${id}" ${openAcc.has(id)?'open':''}><summary>${CHEV}${b.name}${miss?`<span class="miss">待補 ${miss}</span>`:''}<span class="cnt">${cnt}</span></summary>${note}<div class="rows">${inner}</div></details>`;
-
+  const bank = (id, b, cnt, miss, inner) => `<details class="bank" data-acc="${id}" ${openAcc.has(id)?'open':''}><summary>${CHEV}${esc(b.name)}${miss?`<span class="miss">待補 ${miss}</span>`:''}<span class="cnt">${cnt}</span></summary><div class="rows">${inner}</div></details>`;
   const prod = BANKS.map(b => bank(`p-${b.id}`, b, `${b.cards.length} 張卡`, missCard(b),
     `<div class="r"><span class="hd">卡片</span><span class="hd">官網</span><span class="hd">活動網址</span></div>` +
     b.cards.map(c => `<div class="r" id="row-card:${c.id}:official"><span class="nm">${esc(c.name)}</span>${urlCell(`card:${c.id}:official`)}${urlCell(`card:${c.id}:event`)}</div>`).join(''))).join('');
-  const add = BANKS.map(b => {
-    return bank(`a-${b.id}`, b, `${ITEMS.addon.length} 個主題`, missAdd(b),
-      ITEMS.addon.map(it => { const k=`addon:${b.id}:${it.id}`; return `<div class="r addon" id="row-${k}"><span class="nm">${it.label}</span>${urlCell(k)}</div>`; }).join('')); }).join('');
-  const totalMissP = BANKS.reduce((n,b)=>n+missCard(b),0), totalMissA = BANKS.reduce((n,b)=>n+missAdd(b),0);
-  $('#acc').innerHTML = acc('product','產品權益', `${BANKS.reduce((n,b)=>n+b.cards.length,0)} 張卡`, totalMissP, prod)
-                     + acc('addon','附加權益', `${BANKS.length} 家銀行`, totalMissA, add);
+  const add = BANKS.map(b => bank(`a-${b.id}`, b, `${ITEMS.addon.length} 個主題`, missAdd(b),
+    ITEMS.addon.map(it => { const k=`addon:${b.id}:${it.id}`; return `<div class="r addon" id="row-${k}"><span class="nm">${it.label}</span>${urlCell(k)}</div>`; }).join(''))).join('');
+  $('#acc').innerHTML = BANKS.length
+    ? acc('product','產品權益', `${BANKS.reduce((n,b)=>n+b.cards.length,0)} 張卡`, BANKS.reduce((n,b)=>n+missCard(b),0), prod) + acc('addon','附加權益', `${BANKS.length} 家銀行`, BANKS.reduce((n,b)=>n+missAdd(b),0), add)
+    : `<p class="loading">${esc(state.loadError || '尚未讀到試算表資料')}</p>`;
 }
 const admin = $('#view-admin');
 admin.addEventListener('toggle', e => { const id = e.target.dataset?.acc; if (!id) return; e.target.open ? openAcc.add(id) : openAcc.delete(id); }, true);
-admin.addEventListener('click', e => {
-  const f = e.target.closest('[data-fix]'); if (f) return goFix(f.dataset.fix);
-  const eb = e.target.closest('[data-editbtn]'); if (eb) return startEdit(eb.dataset.editbtn);
-  const r = e.target.closest('[data-reset]'); if (r){ delete state.overrides[r.dataset.reset]; afterUrlChange(); persist().then(ok => ok && toast('已還原為預設網址')); }
+admin.addEventListener('input', e => {
+  if (e.target.matches('#tTitle,#tSub,#tTag,#sheetUrl')) e.target.dataset.dirty = '1';
+  const row = e.target.closest('.bk[data-i]'); if (row && e.target.dataset.f) bankDraft[+row.dataset.i][e.target.dataset.f] = e.target.value;
 });
-function startEdit(key){
-  state.editing = key; renderAdminForce();
-  const inp = admin.querySelector(`input[data-edit="${key}"]`); inp?.focus(); inp?.select();
+admin.addEventListener('click', async e => {
+  const f = e.target.closest('[data-fix]'); if (f) return goFix(f.dataset.fix);
+  const del = e.target.closest('[data-delbank]');
+  if (del){ if (bankDraft.length <= 1) return toast('至少需要一家銀行'); bankDraft.splice(+del.dataset.delbank, 1); renderAdmin(); toast('已移除，按「儲存資料來源」後生效'); }
+});
+async function saveConfig(body, okMsg){
+  try { const d = await api('/api/config', { method:'PUT', body: JSON.stringify(body) }); applyState(d); bankDraft = null; renderAll(); toast(okMsg); return true; }
+  catch(e){ if (e.status === 401){ logout(); toast('登入已過期，請重新登入'); } else toast(e.message || '儲存失敗'); return false; }
 }
-function renderAdminForce(){ const k = state.editing; state.editing = null; renderAdmin(); state.editing = k; if (k){ const cell = admin.querySelector(`[data-editbtn="${k}"]`)?.closest('.u'); if (cell) cell.outerHTML = urlCell(k); } }
-function commitEdit(inp, save){
-  const key = inp.dataset.edit; if (state.editing !== key) return;
-  state.editing = null;
-  if (save){
-    const v = inp.value.trim();
-    if (v && !/^https?:\/\//i.test(v)){ toast('網址需以 http:// 或 https:// 開頭'); state.editing = key; inp.focus(); return; }
-    if (v === defaultUrl(key)) delete state.overrides[key]; else state.overrides[key] = v;
-    persist().then(ok => ok && toast(v ? '網址已儲存' : '已清空此網址'));
-  }
-  afterUrlChange();
-  admin.querySelector(`[data-editbtn="${key}"]`)?.focus();
-}
-admin.addEventListener('keydown', e => { const inp = e.target.closest('input[data-edit]'); if (!inp) return; if (e.key==='Enter'){ e.preventDefault(); commitEdit(inp, true); } else if (e.key==='Escape'){ e.preventDefault(); commitEdit(inp, false); } });
-admin.addEventListener('focusout', e => { const inp = e.target.closest?.('input[data-edit]'); if (inp) setTimeout(() => { if (state.editing === inp.dataset.edit) commitEdit(inp, true); }, 120); });
+function renderAll(){ renderFilters(); if (state.phase==='done'){ state.stale = true; state.phase='skeleton'; } renderTable(); renderInsights(); renderAdmin(); }
+$('#saveTexts').addEventListener('click', async () => {
+  const ok = await saveConfig({ texts:{ title:$('#tTitle').value, subtitle:$('#tSub').value, tagline:$('#tTag').value } }, '網站文字已更新');
+  if (ok) ['#tTitle','#tSub','#tTag'].forEach(id => delete $(id).dataset.dirty);
+});
+$('#resetTexts').addEventListener('click', () => { $('#tTitle').value = DEFAULT_CONFIG.texts.title; $('#tSub').value = DEFAULT_CONFIG.texts.subtitle; $('#tTag').value = DEFAULT_CONFIG.texts.tagline; ['#tTitle','#tSub','#tTag'].forEach(id => $(id).dataset.dirty='1'); toast('已填入預設文字，按「儲存文字」後生效'); });
+$('#addBank').addEventListener('click', () => { bankDraft.push({ id:'', name:'', short:'', cardSheet:'', addonSheet:'' }); renderAdmin(); $('#bankTbl .bk:last-child input')?.focus(); });
+$('#saveSheet').addEventListener('click', async () => {
+  const banks = bankDraft.filter(b => b.name.trim() && b.cardSheet.trim()).map(b => ({ ...b, short: b.short || b.name.replace(/銀行$/,'') }));
+  if (!banks.length) return toast('請至少填寫一家銀行的名稱與卡片分頁');
+  const btn = $('#saveSheet'); btn.disabled = true; btn.textContent = '儲存並同步中…';
+  const ok = await saveConfig({ sheetUrl:$('#sheetUrl').value.trim(), banks }, '資料來源已更新並同步');
+  if (ok) delete $('#sheetUrl').dataset.dirty;
+  btn.disabled = false; btn.textContent = '儲存資料來源';
+});
+$('#syncNow').addEventListener('click', async () => {
+  const btn = $('#syncNow'); btn.disabled = true; btn.textContent = '同步中…';
+  try { applyState(await api('/api/sync', { method:'POST' })); bankDraft = null; renderAll(); toast('已重新讀取試算表'); }
+  catch(e){ if (e.status === 401){ logout(); toast('登入已過期，請重新登入'); } else toast('同步失敗：' + e.message); }
+  btn.disabled = false; btn.textContent = '立即同步';
+});
+$('#savePw').addEventListener('click', async () => {
+  const a = $('#newPw').value, b = $('#newPw2').value;
+  if (a.length < 4) return toast('密碼至少 4 個字元');
+  if (a !== b) return toast('兩次輸入的密碼不一致');
+  if (await saveConfig({ newPassword:a }, '密碼已更新，下次登入請使用新密碼')){ $('#newPw').value = ''; $('#newPw2').value = ''; }
+});
 function goFix(key){
+  if (!state.isAdmin){ toast('請到 Google 試算表補上網址'); return; }
   switchTab('admin');
   const kind = key.split(':')[0];
-  const bid = kind==='card' ? BANK_OF[key.split(':')[1]].id : key.split(':')[1];
+  const bid = kind==='card' ? BANK_OF[key.split(':')[1]]?.id : key.split(':')[1];
   openAcc.add(kind==='card'?'product':'addon'); openAcc.add((kind==='card'?'p-':'a-')+bid);
-  state.editing = null; renderAdmin();
+  renderAdmin();
   const row = document.getElementById('row-'+key);
-  if (row){ row.scrollIntoView({ block:'center', behavior:'smooth' }); row.classList.add('flash'); setTimeout(()=>startEdit(key), 350); }
+  if (row){ row.scrollIntoView({ block:'center', behavior:'smooth' }); row.classList.remove('flash'); void row.offsetWidth; row.classList.add('flash'); }
 }
-function afterUrlChange(){ renderFilters(); if (state.phase==='done'){ state.stale = true; state.phase='skeleton'; } renderTable(); renderInsights(); renderAdmin(); }
 
 /* ================= 管理者登入（密碼存在 Worker） ================= */
 function logout(){ try{ sessionStorage.removeItem(TOKEN_KEY); }catch(e){} state.isAdmin = false; updateAdminUI(); switchTab('gen'); }
@@ -863,9 +959,9 @@ $('#xlsxBtn').addEventListener('click', () => {
   const ins = [...document.querySelectorAll('#insights .ins')].flatMap(a => [[a.querySelector('h3').textContent], ...[...a.querySelectorAll('li')].map(li=>['', li.textContent]), ['']]);
   const ws2 = XLSX.utils.aoa_to_sheet(ins); ws2['!cols']=[{wch:22},{wch:90}];
   XLSX.utils.book_append_sheet(wb, ws2, '3大洞察');
-  const src = [['銀行','卡片／主題','來源類型','網址','後台修改','資料抓取時間']];
-  cols.forEach(id => ['official','event'].forEach(f => { const k=`card:${id}:${f}`; src.push([BANK_OF[id].short, CARD[id].name, f==='official'?'官網':'活動網址', eff(k)||'（未記載）', k in state.overrides?'是':'', state.fetchedAt||'']); }));
-  [...new Set(cols.map(id=>BANK_OF[id].id))].forEach(bid => visibleRows('addon').forEach(r => { const k=`addon:${bid}:${r}`; src.push([BANKS.find(b=>b.id===bid).short, ITEM[r].label, '附加權益', eff(k)||'（未記載）', k in state.overrides?'是':'', state.fetchedAt||'']); }));
+  const src = [['銀行','卡片／主題','來源類型','網址','資料抓取時間']];
+  cols.forEach(id => ['official','event'].forEach(f => { const k=`card:${id}:${f}`; src.push([BANK_OF[id].short, CARD[id].name, f==='official'?'官網':'活動網址', eff(k)||'（未記載）', state.fetchedAt||'']); }));
+  [...new Set(cols.map(id=>BANK_OF[id].id))].forEach(bid => visibleRows('addon').forEach(r => { const k=`addon:${bid}:${r}`; src.push([BANKS.find(b=>b.id===bid).short, ITEM[r].label, '附加權益', eff(k)||'（未記載）', state.fetchedAt||'']); }));
   const ws3 = XLSX.utils.aoa_to_sheet(src); ws3['!cols']=[{wch:12},{wch:18},{wch:10},{wch:90},{wch:8}];
   XLSX.utils.book_append_sheet(wb, ws3, '官方資料來源網址履歷表');
   save(`信用卡競品比較_${stamp()}.xlsx`, XLSX.write(wb, { bookType:'xlsx', type:'array' }));
