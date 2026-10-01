@@ -1,0 +1,25 @@
+# Cloudflare Workers 設定（免費方案即可）
+name = "cardscompetitiveanalysis"
+main = "worker/index.js"
+compatibility_date = "2025-09-01"
+
+# 網站靜態檔
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+# 儲存網站設定、管理者密碼、缺漏紀錄與網頁快取（KV：CardsCompetitiveAnalysis）
+[[kv_namespaces]]
+binding = "STORE"
+id = "897559016557451eaac36e6250907e2f"
+
+[vars]
+# 同一個官方網址在幾分鐘內重複查詢時直接用快取（最少 1 分鐘）
+CACHE_MINUTES = "60"
+# （選用）若之後設定了 GEMINI_API_KEY，會改用 Gemini 擷取；設成 "false" 可強制使用內建爬蟲
+USE_GEMINI = "true"
+GEMINI_MODEL = "gemini-2.5-flash"
+
+# 不需要設定任何機密即可運作：
+#   管理者預設密碼 1234，登入後可在後台修改
+#   （選用）設定 GEMINI_API_KEY 後改用 Gemini 擷取
