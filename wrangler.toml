@@ -12,7 +12,7 @@ binding = "ASSETS"
 # 執行 `npx wrangler kv namespace create STORE` 後，把回傳的 id 貼到下面
 [[kv_namespaces]]
 binding = "STORE"
-id = "請貼上你的 KV namespace id"
+id = "ca5ae12180b54c54bc74ab11d3fd4d02"
 
 [vars]
 # 同一個官方網址在幾分鐘內重複查詢時直接用快取（最少 1 分鐘）
