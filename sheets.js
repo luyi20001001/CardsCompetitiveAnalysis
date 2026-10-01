@@ -4,7 +4,7 @@
 //   卡片分頁欄位：主力/非主力、卡片名稱、特色、類型、銀行卡/聯名卡、官網、活動網址
 //   附加權益分頁欄位：主題、網址
 // ============================================================
-import { ITEMS } from '../public/data.js';
+import { ITEMS } from './data.js';
 
 export function sheetId(url) {
   const m = String(url || '').match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
